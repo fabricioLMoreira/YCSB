@@ -191,12 +191,16 @@ public class RethinkDBClient extends DB {
                      final Set<String> fields,
                      final Vector<HashMap<String, ByteIterator>> result) {
     try {
-      Cursor<Map<String, Object>> cursor = R.db(DATABASE)
+      ReqlExpr q = R.db(DATABASE)
           .table(table)
           .between(startkey, R.maxval())
-          .limit(recordcount)
-          .pluck(fields.toArray())
-          .run(this.conn);
+          .limit(recordcount);
+
+      if (fields != null) {
+        q = q.pluck(fields.toArray());
+      }
+
+      Cursor<Map<String, Object>> cursor = q.run(this.conn);
 
       if (!cursor.hasNext()) {
         System.err.println("Nothing found in scan for key " + startkey);
